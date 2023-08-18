@@ -7,6 +7,9 @@ var answerEl = document.querySelector('#choices');
 var endScreen = document.querySelector('#end-screen');
 var finalScore = document.querySelector('#final-score');
 var feedbackEl = document.querySelector('#feedback');
+var saveBtn = document.querySelector('#submit')
+var highScoresEl = document.querySelector('#scores')
+var clearBtn = document.querySelector('#clear')
 let index = 0;
 let time = 60;
 let timeInterval;
@@ -64,8 +67,8 @@ function renderQuestion() {
     let currentQuestion = questions[index];
     quesTitleEl.textContent = currentQuestion.title;
     answerEl.innerHTML = '';
-    currentQuestion.choices.foreach((choice) => {
-        let choiceBtn = documment.createElement('button');
+    currentQuestion.choices.forEach((choice) => {
+        let choiceBtn = document.createElement('button');
         choiceBtn.textContent = choice;
         answerEl.append(choiceBtn);
         choiceBtn.onclick = checkAnswer;
@@ -80,7 +83,7 @@ function checkAnswer() {
         setTimeout(function () {
             feedbackEl.classList.add('hide');
         }, 1000);
-        time -= 10;
+        time -= 15;
         timerEl.textContent = time;
 
         if (time <= 0) {
@@ -105,16 +108,18 @@ function checkAnswer() {
 
 function endGame() {
     clearInterval(timeInterval);
-    quesTitleEl.classList.add('hide');
+    questionsEl.classList.add('hide');
     feedbackEl.classList.add('hide');
-    endScreen.classList.add('hide');
+    endScreen.classList.remove('hide');
     finalScore.textContent = time;
-    document.querySelector('#submit').onclick = ;
+   document.querySelector('#submit').onclick = saveScore;
+
+
 
 }
 function saveScore() {
     let initials = document.querySelector('input').value;
-    let highscores = JSON.parse(localStorage.getItem('score')) || [];
+    let highscores = JSON.parse(localStorage.getItem('scores')) || [];
 
     if (initials) {
         let newScore = {
@@ -124,17 +129,36 @@ function saveScore() {
 
         highscores.push(newScore)
 
-        for (let i = highscores.length - 1; i > 0; i--) {
-            if (highscores[i - 1].score <= newScore.score) {
-                highscores.splice(i - 1, 1)
-            }
-            else {
-                highscores.splice(highscores.length - 1, 1)
-            }
-        }
+        localStorage.setItem('scores', JSON.stringify(highscores));
+        highScores();
+    
     }
 
-    localStorage.setItem('scores', JSON.stringify(highscores));
+    
 }
 
+
+function highScores(){
+    endScreen.classList.add('hide')
+    highScoresEl.classList.remove ('hide');
+    let highscores = JSON.parse(localStorage.getItem('scores')) || [];
+    highscores.sort(
+        function (a,b) {
+            return b - a
+        }
+    )
+     for (let i = 0; i < highscores.length; i++ ) {
+        let liEl = document.createElement("li")
+        liEl.textContent= 'initial ' + highscores[i].initials + " - " + highscores[i].score 
+        document.querySelector("#highscores").append(liEl)
+     }
+
+}
+function clearHighscore() {
+    localStorage.clear();
+    document.querySelector('#highscores').innerHTML = " "
+};
+
 startBtn.onclick = startGame;
+saveBtn.onclick = saveScore;
+clearBtn.onclick = clearHighscore;
